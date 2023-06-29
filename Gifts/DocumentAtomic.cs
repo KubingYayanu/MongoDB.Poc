@@ -1,8 +1,6 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
-namespace MongodB.Poc
+namespace MongodB.Poc.Gifts
 {
     public class DocumentAtomic
     {
@@ -207,15 +205,5 @@ namespace MongodB.Poc
                 .SingleAsync();
             Console.WriteLine($"Version 5. Count5: {count5}, Id: {Id5}, Point: {record.Point}.");
         }
-    }
-
-    public class Record
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-
-        [BsonElement("point")]
-        public int Point { get; set; }
     }
 }

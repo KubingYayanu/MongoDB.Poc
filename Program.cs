@@ -1,4 +1,4 @@
-﻿namespace MongodB.Poc // Note: actual namespace depends on the project name.
+﻿namespace MongodB.Poc.Gifts // Note: actual namespace depends on the project name.
 {
     internal class Program
     {
