@@ -5,7 +5,7 @@ namespace MongodB.Poc.Concurrency
     public class AddPointRecordHandler
     {
         private const string MemberId = "649d39e57a838f1a21139aef";
-        private readonly List<Func<Task>> _commands = new();
+        private readonly List<Func<Task<long>>> _commands = new();
 
         private IMongoCollection<Member> _member;
         private IMongoCollection<PointExpiration> _pointExpiration;
@@ -25,7 +25,8 @@ namespace MongodB.Poc.Concurrency
             AddPointRecord(gain, balance);
             UpdateMemberPoint(balance);
             await HandlePointExpiration(gain);
-            await Complete();
+            var count = await Complete();
+            Console.WriteLine($"Effect count: {count}.");
         }
 
         private void AddPointRecord(int gain, int balance)
@@ -39,7 +40,11 @@ namespace MongodB.Poc.Concurrency
                     Balance = balance
                 }
             };
-            _commands.Add(() => _pointRecord.InsertOneAsync(newPointRecord));
+            _commands.Add(async () =>
+            {
+                await _pointRecord.InsertOneAsync(newPointRecord);
+                return 1;
+            });
         }
 
         private void UpdateMemberPoint(int balance)
@@ -48,7 +53,11 @@ namespace MongodB.Poc.Concurrency
                 .Where(x => x.Id == MemberId);
             var update = Builders<Member>.Update
                 .Set(x => x.Point, new MemberPoint { Balance = balance });
-            _commands.Add(() => _member.UpdateOneAsync(filter, update));
+            _commands.Add(async () =>
+            {
+                var result = await _member.UpdateOneAsync(filter, update);
+                return result.ModifiedCount;
+            });
         }
 
         private async Task HandlePointExpiration(int gain)
@@ -87,7 +96,11 @@ namespace MongodB.Poc.Concurrency
                     Balance = gain
                 }
             };
-            _commands.Add(() => _pointExpiration.InsertOneAsync(newPointExpiration));
+            _commands.Add(async () =>
+            {
+                await _pointExpiration.InsertOneAsync(newPointExpiration);
+                return 1;
+            });
         }
 
         private void UpdateExpirationBalance(int gain)
@@ -96,17 +109,24 @@ namespace MongodB.Poc.Concurrency
                 .Where(x => x.Member.MemberId == MemberId);
             var update = Builders<PointExpiration>.Update
                 .Inc(x => x.Point.Balance, gain);
-            _commands.Add(() => _pointExpiration.UpdateOneAsync(filter, update));
+            _commands.Add(async () =>
+            {
+                var result = await _pointExpiration.UpdateOneAsync(filter, update);
+                return result.ModifiedCount;
+            });
         }
 
-        private async Task Complete()
+        private async Task<long> Complete()
         {
+            long count = 0;
             foreach (var command in _commands)
             {
-                await command();
+                var amount = await command();
+                count += amount;
             }
 
             _commands.Clear();
+            return count;
         }
     }
 }

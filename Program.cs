@@ -6,7 +6,7 @@ namespace MongodB.Poc.Gifts // Note: actual namespace depends on the project nam
     {
         static async Task Main(string[] args)
         {
-            await ConnectionPoolExhausted();
+            await OptimisticConcurrency();
             Console.ReadLine();
         }
 
@@ -24,6 +24,12 @@ namespace MongodB.Poc.Gifts // Note: actual namespace depends on the project nam
         {
             var connections = new ConnectionPoolExhausted();
             await connections.GetMember();
+        }
+
+        private static async Task OptimisticConcurrency()
+        {
+            var concurrency = new OptimisticConcurrency();
+            await concurrency.Go();
         }
     }
 }
