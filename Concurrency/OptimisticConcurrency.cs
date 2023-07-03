@@ -12,7 +12,7 @@ namespace MongodB.Poc.Concurrency
 
         public OptimisticConcurrency()
         {
-            var client = new MongoClient("mongodb://localhost:2000");
+            var client = new MongoClient("mongodb://localhost:3001");
             var database = client.GetDatabase("concurrency");
             _member = database.GetCollection<Member>("member");
         }
@@ -20,18 +20,25 @@ namespace MongodB.Poc.Concurrency
         public async Task Go()
         {
             var tasks = new List<Task>();
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 5; i++)
             {
                 var task = Task.Run(async () =>
                 {
-                    var members = await _member.Find(x => x.Id == MemberId)
-                        .ToListAsync();
-                    var member = members.FirstOrDefault();
-                    var balance = member.Point.Balance;
+                    try
+                    {
+                        var members = await _member.Find(x => x.Id == MemberId)
+                            .ToListAsync();
+                        var member = members.FirstOrDefault();
+                        var balance = member.Point.Balance;
 
-                    var handler = new AddPointRecordHandler();
-                    await handler.Add(10, balance + 10);
-                    count += 1;
+                        var handler = new AddPointRecordHandler();
+                        await handler.Add(10, balance + 10);
+                        count += 1;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 });
                 tasks.Add(task);
             }
