@@ -2,7 +2,7 @@
 
 namespace MongodB.Poc.Concurrency
 {
-    public class OptimisticConcurrency
+    public class ConcurrencyTransaction
     {
         private const string MemberId = "649d39e57a838f1a21139aef";
 
@@ -10,7 +10,7 @@ namespace MongodB.Poc.Concurrency
 
         private int count;
 
-        public OptimisticConcurrency()
+        public ConcurrencyTransaction()
         {
             var client = new MongoClient("mongodb://localhost:3001");
             var database = client.GetDatabase("concurrency");
