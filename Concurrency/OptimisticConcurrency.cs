@@ -37,6 +37,9 @@ namespace MongodB.Poc.Concurrency
                     }
                     catch (Exception ex)
                     {
+                        // 當發生 WriteConflict，依照需求執行 retry 或是中斷執行
+                        // Command update failed: WriteConflict error: this operation conflicted with another operation.
+                        // Please retry your operation or multi-document transaction..
                         Console.WriteLine(ex.Message);
                     }
                 });
