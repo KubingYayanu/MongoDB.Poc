@@ -15,7 +15,7 @@ namespace MongodB.Poc.Concurrency
 
         public AddPointRecordHandler()
         {
-            _client = new MongoClient("mongodb://localhost:3001");
+            _client = new MongoClient("mongodb://localhost:3003");
             _database = _client.GetDatabase("concurrency");
             _member = _database.GetCollection<Member>("member");
             _pointRecord = _database.GetCollection<PointRecord>("point_record");
@@ -100,11 +100,12 @@ namespace MongodB.Poc.Concurrency
             _commands.Add(s => _pointExpiration.ReplaceOneAsync(s, filter, pointExpiration));
         }
 
-        private async Task Complete()
+        private async Task Complete(MongoDBIsolationLevel level = MongoDBIsolationLevel.ReadCommitted)
         {
+            var transactionOptions = GetTransactionOptions(level);
             using (var session = await _client.StartSessionAsync())
             {
-                session.StartTransaction();
+                session.StartTransaction(transactionOptions);
 
                 foreach (var command in _commands)
                 {
@@ -115,6 +116,23 @@ namespace MongodB.Poc.Concurrency
             }
 
             _commands.Clear();
+        }
+
+        private TransactionOptions GetTransactionOptions(MongoDBIsolationLevel level)
+        {
+            // 預設 ReadCommitted 
+            var readConcern = ReadConcern.Majority;
+            if (level == MongoDBIsolationLevel.RepeatableRead)
+            {
+                readConcern = ReadConcern.Snapshot;
+            }
+
+            return new TransactionOptions(
+                readConcern: readConcern,
+                readPreference: ReadPreference.Primary,
+                writeConcern: WriteConcern.WMajority,
+                maxCommitTime: TimeSpan.FromSeconds(30));
+            ;
         }
     }
 }
