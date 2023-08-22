@@ -69,7 +69,7 @@ $ docker exec -it mongo1 mongosh
 
 # 進入 mongosh 模式，執行下列語法
 # 使用 config 初始化 Replica Set
-$ rs.initiate({ "_id": "MRS", "members": [{ "_id": 0, "host": "mongo1:27017" },{ "_id": 1, "host": "mongo2:27017" },{ "_id": 2, "host": "mongo3:27017" }]});
+$ rs.initiate({ "_id": "MRS", "members": [{ "_id": 0, "host": "mongo1:27017", priority: 1 },{ "_id": 1, "host": "mongo2:27017", priority: 0.5 },{ "_id": 2, "host": "mongo3:27017", priority: 0.5 }]});
 
 # 驗證 Replica Set
 $ rs.status().members.map(m => `${m.name}(${m.stateStr})`).join('\n')
