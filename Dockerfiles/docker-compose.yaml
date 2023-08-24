@@ -1,0 +1,82 @@
+version: "3.7"
+
+services:
+  mongo1:
+    image: poc/mongo:6.0.6
+    build:
+      context: ./MongoDB/
+      dockerfile: Dockerfile
+    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    restart: always
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: localhost
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${PWD}
+    volumes:
+      - mongo1-data:/data/db
+      - mongo1-config:/data/configdb
+    networks:
+      - default
+    expose:
+      - 27017
+    ports:
+      - 3001:27017
+    links:
+      - mongo2
+      - mongo3
+
+  mongo2:
+    image: poc/mongo:6.0.6
+    build:
+      context: ./MongoDB/
+      dockerfile: Dockerfile
+    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    restart: always
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: localhost
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${PWD}
+    volumes:
+      - mongo2-data:/data/db
+      - mongo2-config:/data/configdb
+    networks:
+      - default
+    expose:
+      - 27017
+    ports:
+      - 3002:27017
+
+  mongo3:
+    image: poc/mongo:6.0.6
+    build:
+      context: ./MongoDB/
+      dockerfile: Dockerfile
+    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    restart: always
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: localhost
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${PWD}
+    volumes:
+      - mongo3-data:/data/db
+      - mongo3-config:/data/configdb
+    networks:
+      - default
+    expose:
+      - 27017
+    ports:
+      - 3003:27017
+
+volumes:
+  mongo1-data:
+  mongo1-config:
+
+  mongo2-data:
+  mongo2-config:
+
+  mongo3-data:
+  mongo3-config:
+
+networks:
+    default:
+      name: mongo_cluster
