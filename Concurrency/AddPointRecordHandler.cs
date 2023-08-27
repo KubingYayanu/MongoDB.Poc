@@ -15,7 +15,7 @@ namespace MongodB.Poc.Concurrency
 
         public AddPointRecordHandler()
         {
-            _client = new MongoClient("mongodb://localhost:3003");
+            _client = new MongoClient("mongodb://root:wf6254fFED234@mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs");
             _database = _client.GetDatabase("concurrency");
             _member = _database.GetCollection<Member>("member");
             _pointRecord = _database.GetCollection<PointRecord>("point_record");

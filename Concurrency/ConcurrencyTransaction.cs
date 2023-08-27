@@ -12,7 +12,7 @@ namespace MongodB.Poc.Concurrency
 
         public ConcurrencyTransaction()
         {
-            var client = new MongoClient("mongodb://localhost:3003");
+            var client = new MongoClient("mongodb://root:wf6254fFED234@mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs");
             var database = client.GetDatabase("concurrency");
             _member = database.GetCollection<Member>("member");
         }
