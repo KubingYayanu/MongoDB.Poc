@@ -1,82 +1,73 @@
-version: "3.7"
+version: "3.8"
 
 services:
-  mongo1:
+  mongo-poc-node-1:
     image: poc/mongo:6.0.6
+    container_name: mongo-poc-node-1
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    command: mongod --port 30001 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
     restart: always
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: localhost
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo1-data:/data/db
-      - mongo1-config:/data/configdb
+      - mongo-poc-node-1-data:/data/db
+      - mongo-poc-node-1-config:/data/configdb
     networks:
       - default
-    expose:
-      - 27017
     ports:
-      - 3001:27017
-    links:
-      - mongo2
-      - mongo3
+      - 30001:30001
 
-  mongo2:
+  mongo-poc-node-2:
     image: poc/mongo:6.0.6
+    container_name: mongo-poc-node-2
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    command: mongod --port 30002 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
     restart: always
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: localhost
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo2-data:/data/db
-      - mongo2-config:/data/configdb
+      - mongo-poc-node-2-data:/data/db
+      - mongo-poc-node-2-config:/data/configdb
     networks:
       - default
-    expose:
-      - 27017
     ports:
-      - 3002:27017
+      - 30002:30002
 
-  mongo3:
+  mongo-poc-node-3:
     image: poc/mongo:6.0.6
+    container_name: mongo-poc-node-3
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 27017 --replSet MRS --keyFile /data/mongodb-keyfile
+    command: mongod --port 30003 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
     restart: always
     environment:
-      MONGODB_ADVERTISED_HOSTNAME: localhost
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo3-data:/data/db
-      - mongo3-config:/data/configdb
+      - mongo-poc-node-3-data:/data/db
+      - mongo-poc-node-3-config:/data/configdb
     networks:
       - default
-    expose:
-      - 27017
     ports:
-      - 3003:27017
+      - 30003:30003
 
 volumes:
-  mongo1-data:
-  mongo1-config:
+  mongo-poc-node-1-data:
+  mongo-poc-node-1-config:
 
-  mongo2-data:
-  mongo2-config:
+  mongo-poc-node-2-data:
+  mongo-poc-node-2-config:
 
-  mongo3-data:
-  mongo3-config:
+  mongo-poc-node-3-data:
+  mongo-poc-node-3-config:
 
 networks:
-    default:
-      name: mongo_cluster
+  default:
+    name: mongo_poc_rs

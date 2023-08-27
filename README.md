@@ -47,45 +47,56 @@ db.records.insertMany([
 
 ## Replica Set
 
-### Docker
+### `\etc\hosts`
 
-- 初始化 Containers
-
-```bash
-$ docker network create mongo-cluster
-$ docker volume create volume-mongo1
-$ docker volume create volume-mongo2
-$ docker volume create volume-mongo3
-$ docker run --restart=always --name mongo1 -v volume-mongo1:/data/db --net mongo-cluster -p 3001:27017 -d mongo:6.0.6 mongod --replSet MRS
-$ docker run --restart=always --name mongo2 -v volume-mongo2:/data/db --net mongo-cluster -p 3002:27017 -d mongo:6.0.6 mongod --replSet MRS
-$ docker run --restart=always --name mongo3 -v volume-mongo3:/data/db --net mongo-cluster -p 3003:27017 -d mongo:6.0.6 mongod --replSet MRS
+```plain
+# hosts 檔加上以下內容，local DNS 才有辦法解析 Docker Container
+127.0.0.1    mongo-poc-node-1 mongo-poc-node-3 mongo-poc-node-3
 ```
 
-- 設定 Replica Set
+### Docker
+
+- 執行 Docker Compose
 
 ```bash
-# 進入 mongo1 並執行 mongosh
-$ docker exec -it mongo1 mongosh
+# 第一次執行
+$ docker-compose -f docker-compose.yaml -p mongo-poc  up -d
 
-# 進入 mongosh 模式，執行下列語法
-# 使用 config 初始化 Replica Set
-$ rs.initiate({ "_id": "MRS", "members": [{ "_id": 0, "host": "mongo1:27017", priority: 1 },{ "_id": 1, "host": "mongo2:27017", priority: 0.5 },{ "_id": 2, "host": "mongo3:27017", priority: 0.5 }]});
+# 重新編譯相依服務 Image
+$ docker-compose -f docker-compose.yaml -p mongo-poc  up -d --build
+
+# MongoDB Replica Set 服務啟動後，需要執行以下指令初始化 replica set
+$ docker exec mongo-poc-node-1 bash -c "mongosh mongodb://mongo-poc-node-1:30001 < /data/init-replica.js"
+```
+
+- 驗證 Replica Set
+
+```bash
+# 進入 mongo-poc-node-1 並執行 mongosh
+$ docker exec -it mongo-poc-node-1 mongosh mongodb://mongo-poc-node-1:30001
+
+# Authorization
+$ use admin
+$ db.auth('root','wf6254fFED234');
 
 # 驗證 Replica Set
 $ rs.status().members.map(m => `${m.name}(${m.stateStr})`).join('\n')
+mongo-poc-node-1:30001(PRIMARY)
+mongo-poc-node-2:30002(SECONDARY)
+mongo-poc-node-3:30003(SECONDARY)
 ```
 
 - 在 Container 中連線 Replica Set
 
 ```bash
-$ docker exec -it mongo2 bash
-$ mongosh mongodb://mongo1:27017,mongo2:27017,mongo3:27017/?replicaSet=MRS
+$ docker exec -it mongo-poc-node-1 bash
+$ mongosh mongodb://mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-1:30003/?replicaSet=mrs
 ```
 
 ### DB - concurrency
 
 - 使用 GUI 連線
-    - Connection String: `mongodb://localhost:3001`
+    - Connection String: `mongodb://mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs`
 - Initial Collection/Documents
 
 ```text
