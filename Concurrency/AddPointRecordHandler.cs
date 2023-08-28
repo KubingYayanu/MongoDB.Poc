@@ -15,7 +15,8 @@ namespace MongodB.Poc.Concurrency
 
         public AddPointRecordHandler()
         {
-            _client = new MongoClient("mongodb://root:wf6254fFED234@mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs");
+            _client = new MongoClient(
+                "mongodb://root:wf6254fFED234@mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs");
             _database = _client.GetDatabase("concurrency");
             _member = _database.GetCollection<Member>("member");
             _pointRecord = _database.GetCollection<PointRecord>("point_record");
@@ -122,7 +123,11 @@ namespace MongodB.Poc.Concurrency
         {
             // 預設 ReadCommitted 
             var readConcern = ReadConcern.Majority;
-            if (level == MongoDBIsolationLevel.RepeatableRead)
+            if (level == MongoDBIsolationLevel.ReadUncommitted)
+            {
+                readConcern = ReadConcern.Local;
+            }
+            else if (level == MongoDBIsolationLevel.RepeatableRead)
             {
                 readConcern = ReadConcern.Snapshot;
             }

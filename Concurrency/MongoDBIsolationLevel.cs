@@ -2,6 +2,7 @@
 {
     public enum MongoDBIsolationLevel
     {
+        ReadUncommitted,
         ReadCommitted,
         RepeatableRead
     }
