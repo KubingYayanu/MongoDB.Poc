@@ -51,7 +51,7 @@ db.records.insertMany([
 
 ```plain
 # hosts 檔加上以下內容，local DNS 才有辦法解析 Docker Container
-127.0.0.1    mongo-poc-node-1 mongo-poc-node-3 mongo-poc-node-3
+127.0.0.1    mongo-poc
 ```
 
 ### Docker
@@ -60,20 +60,20 @@ db.records.insertMany([
 
 ```bash
 # 第一次執行
-$ docker-compose -f docker-compose.yaml -p mongo-poc  up -d
+$ docker-compose -f docker-compose.yaml -p mongo-poc up -d
 
 # 重新編譯相依服務 Image
-$ docker-compose -f docker-compose.yaml -p mongo-poc  up -d --build
+$ docker-compose -f docker-compose.yaml -p mongo-poc up -d --build
 
 # MongoDB Replica Set 服務啟動後，需要執行以下指令初始化 replica set
-$ docker exec mongo-poc-node-1 bash -c "mongosh mongodb://mongo-poc-node-1:30001 < /data/init-replica.js"
+$ docker exec mongo-poc-node-1-1 bash -c "export MONGO_HOST=mongo-poc; export MONGO_INITDB_ROOT_USERNAME=root; export MONGO_INITDB_ROOT_PASSWORD=wf6254fFED234; mongosh mongodb://mongo-poc:30001 < /data/conf/init-replica.js;"
 ```
 
 - 驗證 Replica Set
 
 ```bash
-# 進入 mongo-poc-node-1 並執行 mongosh
-$ docker exec -it mongo-poc-node-1 mongosh mongodb://mongo-poc-node-1:30001
+# 進入 mongo-poc-node-1-1 並執行 mongosh
+$ docker exec -it mongo-poc-node-1-1 mongosh mongodb://mongo-poc:30001
 
 # Authorization
 $ use admin
@@ -81,22 +81,22 @@ $ db.auth('root','wf6254fFED234');
 
 # 驗證 Replica Set
 $ rs.status().members.map(m => `${m.name}(${m.stateStr})`).join('\n')
-mongo-poc-node-1:30001(PRIMARY)
-mongo-poc-node-2:30002(SECONDARY)
-mongo-poc-node-3:30003(SECONDARY)
+mongo-poc-node-1-1:30001(PRIMARY)
+mongo-poc-node-2-1:30002(SECONDARY)
+mongo-poc-node-3-1:30003(SECONDARY)
 ```
 
 - 在 Container 中連線 Replica Set
 
 ```bash
-$ docker exec -it mongo-poc-node-1 bash
-$ mongosh mongodb://mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-1:30003/?replicaSet=mrs
+$ docker exec -it mongo-poc-node-1-1 bash
+$ mongosh mongodb://mongo-poc:30001,mongo-poc:30002,mongo-poc:30003/?replicaSet=mrs
 ```
 
 ### DB - concurrency
 
 - 使用 GUI 連線
-    - Connection String: `mongodb://mongo-poc-node-1:30001,mongo-poc-node-2:30002,mongo-poc-node-3:30003/?replicaSet=mrs`
+    - Connection String: `mongodb://mongo-poc:30001,mongo-poc:30002,mongo-poc:30003/?replicaSet=mrs`
 - Initial Collection/Documents
 
 ```text

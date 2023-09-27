@@ -1,72 +1,75 @@
 version: "3.8"
 
 services:
-  mongo-poc-node-1:
+  node-1:
     image: poc/mongo:6.0.6
-    container_name: mongo-poc-node-1
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 30001 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
+    command: mongod --config /data/conf/mongod.conf --port 30001
+    extra_hosts:
+      - "mongo-poc:host-gateway"
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo-poc-node-1-data:/data/db
-      - mongo-poc-node-1-config:/data/configdb
+      - node-1-data:/data/db
+      - node-1-config:/data/configdb
     networks:
       - default
     ports:
       - 30001:30001
 
-  mongo-poc-node-2:
+  node-2:
     image: poc/mongo:6.0.6
-    container_name: mongo-poc-node-2
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 30002 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
+    command: mongod --config /data/conf/mongod.conf --port 30002
+    extra_hosts:
+      - "mongo-poc:host-gateway"
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo-poc-node-2-data:/data/db
-      - mongo-poc-node-2-config:/data/configdb
+      - node-2-data:/data/db
+      - node-2-config:/data/configdb
     networks:
       - default
     ports:
       - 30002:30002
 
-  mongo-poc-node-3:
+  node-3:
     image: poc/mongo:6.0.6
-    container_name: mongo-poc-node-3
     build:
       context: ./MongoDB/
       dockerfile: Dockerfile
-    command: mongod --port 30003 --bind_ip_all --replSet mrs --keyFile /data/mongodb-keyfile
+    command: mongod --config /data/conf/mongod.conf --port 30003
+    extra_hosts:
+      - "mongo-poc:host-gateway"
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${PWD}
     volumes:
-      - mongo-poc-node-3-data:/data/db
-      - mongo-poc-node-3-config:/data/configdb
+      - node-3-data:/data/db
+      - node-3-config:/data/configdb
     networks:
       - default
     ports:
       - 30003:30003
 
 volumes:
-  mongo-poc-node-1-data:
-  mongo-poc-node-1-config:
+  node-1-data:
+  node-1-config:
 
-  mongo-poc-node-2-data:
-  mongo-poc-node-2-config:
+  node-2-data:
+  node-2-config:
 
-  mongo-poc-node-3-data:
-  mongo-poc-node-3-config:
+  node-3-data:
+  node-3-config:
 
 networks:
   default:
